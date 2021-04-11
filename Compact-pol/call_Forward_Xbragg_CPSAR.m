@@ -1,5 +1,5 @@
-%% Forward X-bragg model to generate H-alpha LUT for given volumetric soil moisture mv
-% Ref: Irena Hajnsek, "INVERSION OF SURFACE PARAMETERS USING POLARIMETRIC SAR", Dissertation, pp.165-175
+%% Forward X-bragg model to generate alpha compact-pol (RH-RV) LUT for given volumetric soil moisture mv
+% Ref: Ponnurangam et al. (2016) "Soil Moisture Estimation Using Hybrid Polarimetric SAR Data of RISAT-1", IEEE TGRS. 
 % @author: Dr. Dipankar Mandal
 %%  ---------------------------------------------------------------------------------------
 %   ---------------------------------------------------------------------------------------
@@ -21,9 +21,9 @@
 clear;
 
 %% Incidence angle (SAR geometry)
-inc = 35; %in degree
+inc = 30; %in degree
 %% Volumetric soil moisture given real dielectric constant of soil
-epr = 2:0.1:40;
+epr = 2:0.1:30;
 eps = complex(epr,0.00);
 [xx,yy] = size(epr);
 for i = 1:yy
@@ -40,7 +40,11 @@ figure
 line(mv,alphaC10,'Color','red','LineStyle','-','LineWidth',1.2)
 hold on
 text(max(mv),max(alphaC10),num2str('\beta=10'))
-
+grid on;
+xlabel('Volumetric soil moisture (mv)');
+ylabel('Alpha_c');
+% Range of alpha [-45 +45]
+ylim([0 45])
 %%
 b20 = 20;
 for i = 1:yy
@@ -100,7 +104,7 @@ text(max(mv),max(alphaC90),num2str('\beta=90'))
 LUT_CP = [mv',alphaC10'; mv',alphaC20'; mv',alphaC40'; mv',alphaC60'; mv',alphaC70'; mv',alphaC80'; mv',alphaC90'];
 
 %% Saving LUT 
-save('F:\Github_Dipankar\SAR-processing-matlab\XBragg_surfacemodel\LUT_CP.mat','LUT_CP')
+save('F:\Github_Dipankar\SAR-processing-matlab\XBragg_soil_inversion_CPSAR\LUT_CP.mat','LUT_CP')
 
 
 %% Loading LUT from file

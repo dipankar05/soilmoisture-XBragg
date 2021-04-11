@@ -1,5 +1,5 @@
 %% X-bragg compact-pol model
-% Ref: Irena Hajnsek, "INVERSION OF SURFACE PARAMETERS USING POLARIMETRIC SAR", Dissertation, pp.165-175
+% Ref: Ponnurangam et al. (2016) "Soil Moisture Estimation Using Hybrid Polarimetric SAR Data of RISAT-1", IEEE TGRS. 
 % @author: Dr. Dipankar Mandal
 %%  ---------------------------------------------------------------------------------------
 %   ---------------------------------------------------------------------------------------
@@ -34,25 +34,28 @@ incr = deg2rad(inc);  % in radian
 
 
 %% Bragg coefficients for horizontal (Rh) and vertical (Rv) polarizations
-Rh = (cos(incr) - sqrt(eps - (sin(incr)*sin(incr))))/(cos(incr) + sqrt(eps - (sin(incr)*sin(incr))));
-Rv = ((eps*cos(incr)) - sqrt(eps - (sin(incr)*sin(incr))))/((eps*cos(incr)) + sqrt(eps - (sin(incr)*sin(incr))));
+Rh = (cos(incr) - sqrt(eps - (sin(incr).*sin(incr))))/(cos(incr) + sqrt(eps - (sin(incr).*sin(incr))));
+Rv = ((eps.*cos(incr)) - sqrt(eps - (sin(incr).*sin(incr))))/((eps.*cos(incr)) + sqrt(eps - (sin(incr).*sin(incr))));
 
 
 %% X-Bragg coefficients
-C1 = abs((Rh + Rv))^2;    %% |Rh + Rv|^2;
-C2 = (Rh + Rv)*(conj(Rh) - conj(Rv));
-C3 = 0.5 * (abs((Rh - Rv))^2);    %% |Rh - Rv|^2;
+C1 = abs((Rh + Rv)).^2;    %% |Rh + Rv|^2;
+C2 = (Rh + Rv).*(conj(Rh) - conj(Rv));
+C3 = 0.5 * (abs((Rh - Rv)).^2);    %% |Rh - Rv|^2;
 
 
 %% Stokes vector of X-bragg
-g0 = 0.5* (C1 + 2*C3);
-g1 = C2*(sin(2*b*pi/180)/(2*b*pi/180));
+g0 = 0.5* (C1 + 2.*C3);
+g1 = C2.*(sin(2.*b.*pi/180)/(2.*b.*pi/180));
 g2 = 0;
-g3 = 0.5* (C1 - 2*C3);
+g3 = 0.5* (C1 - 2.*C3);
 
 
-%% H-A-Alpha decomposition
-alphaC = rad2deg(0.5 * atan(real(g1./g3)));
+%% m-Alpha decomposition
+% Ref: Cloude et al. 2012, "Compact Decomposition Theory", IEEE GRSL, p. 29
+alphaC = 0.5 * atan2d(-g3,g1); %atan2(Y,x)
+
+% alphaC = 0.5 * rad2deg(atan(g1./g3));
 
 
 end

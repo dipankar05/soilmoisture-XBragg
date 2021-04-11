@@ -1,5 +1,5 @@
-%% Inversion X-bragg H-A-alpha method
-% Ref: Irena Hajnsek, "INVERSION OF SURFACE PARAMETERS USING POLARIMETRIC SAR", Dissertation, pp.165-175
+%% Inversion X-bragg compact-pol alpha method
+% Ref: Ponnurangam et al. (2016) "Soil Moisture Estimation Using Hybrid Polarimetric SAR Data of RISAT-1", IEEE TGRS. 
 % @author: Dr. Dipankar Mandal
 %%  ---------------------------------------------------------------------------------------
 %   ---------------------------------------------------------------------------------------
@@ -22,39 +22,38 @@ clear;
 load('LUT_CP.mat'); %Load mv-H-alpha LUT generated from forward X-bragg model
 
 %% Observed covariance matrix C2 of RH-RV
-c11c = 0.0025;
-c12r = -0.00465;
-c12img = 0.00163;
+c11c = 0.0032;
+c12r = -0.000065;
+c12img = 0.0013;
+c22c = 0.0039;
 c12c = c12r + c12img*1i;
 c21c = conj(c12c);
-c22c = 0.00970;
 C2 = [c11c c12c; c21c c22c];
 % transmit chi
-chi_transmit = -45; % degree -ve for R and +ve for L
-
+% chi_transmit = -45; % degree -ve for R and +ve for L
+%%
 % Observed Stokes LH-LV/RH-RV
 g0 = c11c + c22c;
 g1 = c11c - c22c;
 g2 = c12c + c21c;
-if (chi_transmit >= 0)
-    g3 = (1i.*(c12c - c21c)); %The sign is according to RC or LC sign !!
-end
+g3 = -(1i.*(c12c - c21c)); %sign for RC case
 
-if (chi_transmit < 0)
-    g3 = -(1i.*(c12c - c21c)); %The sign is according to RC or LC sign !!
-end
+%% conformity coefficient
+cc = (2*c12img)/(c11c+c22c);
 
 %% Observed alpha_c
-alphaC = rad2deg(0.5 * atan(real(g1./g3)));
+% Ref: Cloude et al. 2012, "Compact Decomposition Theory", IEEE GRSL, p. 31
+alphaC = 0.5 * atan2d(g3,sqrt(g1.^2 + g2.^2)); %%tan2d(Y,X)
 
-
-
+if cc >0.5
+    mv_percent = NaN; %% mask regions with cc>0.5
+else
 %% Soil moisture
-[mindiff, row] = min(0.5*sqrt((LUT(:,2)-alphaC).^2));
-mv = LUT(row,1);
+[mindiff, row] = min(0.5*sqrt((LUT_CP(:,2)-alphaC).^2));
+mv = LUT_CP(row,1);
 mv_percent = mv*100;
+end
 
 
 %% Print values
-fprintf('Soil roughness rms (cm)= %0.2f \n',rms_cm);
 fprintf('Volumetric soil moisture (percent) = %0.2f \n',mv_percent);
